@@ -1,0 +1,32 @@
+---
+title: "Project Spline"
+author: "Ofure Udabor"
+date: "2024-04-16"
+output: html_document
+---
+#readin
+```{r}
+print(getwd())
+```
+
+```{r}
+satis<- read.csv("train.csv")
+print(unique(satis$satisfaction))
+print(head(satis))
+```
+
+```{r}
+vars<- c(Age, Flight.Distance, Departure.Delay.in.Minutes, Arrival.Delay.in.Minutes)
+regrSub<- satis[vars]
+```
+
+
+```{r}
+# spline for satisfied: most influential (distance, minutes passed)?
+
+```
+
+```{r}
+#spline for neutral or dissatisfied: most influential (distance, minutes passed)?
+
+```
