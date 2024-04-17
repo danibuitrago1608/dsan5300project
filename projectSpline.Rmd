@@ -91,6 +91,6 @@ ggplot(subTest, aes(x = Departure.Delay.in.Minutes, y = Arrival.Delay.in.Minutes
   geom_tile() +
   scale_fill_gradient(low = "blue", high = "red") +
   labs(title = "Predicted Probability of a Passenger Being Satisfied", x = "Departure Delay", y = "Arrival Delay") +
-  xlim(min(subTest$Departure.Delay.in.Minutes), max(subTest$Departure.Delay.in.Minutes)) +
-  ylim(min(subTest$Arrival.Delay.in.Minutes), max(subTest$Arrival.Delay.in.Minutes))
+  xlim(min(subTest$Departure.Delay.in.Minutes), 200) +
+  ylim(min(subTest$Arrival.Delay.in.Minutes), 200)
 ```
