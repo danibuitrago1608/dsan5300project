@@ -16,14 +16,24 @@ print(head(satis))
 ```
 
 ```{r}
-vars<- c(Age, Flight.Distance, Departure.Delay.in.Minutes, Arrival.Delay.in.Minutes)
-regrSub<- satis[vars]
+vars<- c("Age", "Flight.Distance", "Departure.Delay.in.Minutes", "Arrival.Delay.in.Minutes", "satisfaction")
+regrSub <- subset(satis, select = vars)
+regrSub$satisfaction<- ifelse(regrSub$satisfaction == "satisfied", 1, 0)
+
+head(regrSub)
 ```
 
 
 ```{r}
-# spline for satisfied: most influential (distance, minutes passed)?
+library(mgcv)
 
+set.seed(100)
+
+goodExperience <- gam(satisfaction ~ s(Age) + s(Flight.Distance) + s(Departure.Delay.in.Minutes) + s(Arrival.Delay.in.Minutes), 
+                 family = binomial(link = "logit"), data = regrSub)
+
+#shows some influence among Arrival/ Departure Times
+plot(goodExperience, se=TRUE,col="purple")
 ```
 
 ```{r}
