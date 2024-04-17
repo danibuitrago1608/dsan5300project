@@ -1,0 +1,96 @@
+---
+title: "Project Spline"
+author: "Ofure Udabor"
+date: "2024-04-16"
+output: html_document
+---
+#readin
+```{r}
+print(getwd())
+```
+
+```{r}
+satis<- read.csv("airline_passenger_satisfaction.csv")
+satis<- satis[complete.cases(satis), ]
+print(colSums(is.na(satis)))
+
+#splitting into train and test datasets
+sample <- sample(c(TRUE,FALSE), nrow(satis),  
+                 replace=TRUE, prob=c(0.7,0.3)) 
+satisTrain<- satis[sample, ] 
+satisTest <- satis[!sample, ]
+
+#print(unique(satisTrain$satisfaction))
+#print(colSums(is.na(satisTrain)))
+#print(colSums(is.na(satisTest)))
+print(head(satisTrain))
+```
+
+```{r}
+vars<- c("Age", "Flight.Distance", "Departure.Delay.in.Minutes", "Arrival.Delay.in.Minutes", "satisfaction")
+subTrain <- subset(satisTrain, select = vars)
+subTrain$satisfaction<- ifelse(subTrain$satisfaction == "satisfied", 1, 0)
+
+head(subTrain)
+```
+
+
+```{r}
+library(mgcv)
+
+set.seed(100)
+
+goodExperience <- gam(satisfaction ~ s(Age) + s(Flight.Distance) + s(Departure.Delay.in.Minutes) + s(Arrival.Delay.in.Minutes), 
+                 family = binomial(link = "logit"), data = subTrain)
+summary(goodExperience)
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(goodExperience, se=TRUE,col="purple")
+
+```
+
+
+Due to there being an influence appearing for Arrival/ Departure times:
+
+```{r}
+varsTest<- c("Departure.Delay.in.Minutes", "Arrival.Delay.in.Minutes", "satisfaction")
+subTest <- subset(satisTest, select = varsTest)
+subTest$satisfaction<- ifelse(subTest$satisfaction == "satisfied", 1, 0)
+```
+
+
+```{r}
+newExperience <- gam(satisfaction ~ s(Departure.Delay.in.Minutes) + s(Arrival.Delay.in.Minutes), 
+                 family = binomial(link = "logit"), data = subTrain)
+
+subTest$prob <- predict.gam(newExperience, newdata = subTest, type = "response")
+
+summary(subTest$Departure.Delay.in.Minutes)
+summary(subTest$Arrival.Delay.in.Minutes)
+summary(subTest$prob)
+```
+
+
+```{r}
+library(ggplot2)
+
+ggplot(subTest, aes(x = Departure.Delay.in.Minutes, y = Arrival.Delay.in.Minutes, fill = prob)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Predicted Probability of a Passenger Being Satisfied", x = "Departure Delay", y = "Arrival Delay") +
+  xlim(min(subTest$Departure.Delay.in.Minutes), max(subTest$Departure.Delay.in.Minutes)) +
+  ylim(min(subTest$Arrival.Delay.in.Minutes), max(subTest$Arrival.Delay.in.Minutes))
+```
+
+
+```{r}
+ggplot(subTest, aes(x = Departure.Delay.in.Minutes, y = Arrival.Delay.in.Minutes, fill = prob)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Predicted Probability of a Passenger Being Satisfied", x = "Departure Delay", y = "Arrival Delay") +
+  xlim(min(subTest$Departure.Delay.in.Minutes), max(subTest$Departure.Delay.in.Minutes)) +
+  ylim(min(subTest$Arrival.Delay.in.Minutes), max(subTest$Arrival.Delay.in.Minutes))
+```
